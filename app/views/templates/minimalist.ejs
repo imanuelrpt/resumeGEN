@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @page { size: A4; margin: 0; }
+        body { font-family: 'Inter', sans-serif; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    </style>
+</head>
+<body class="bg-white p-16">
+    <header class="text-center mb-10">
+        <% if (resume.photo) { %>
+            <img src="<%= photoBase %>/<%= resume.photo %>" class="w-32 h-32 rounded-full mx-auto mb-4 object-cover border-2 border-gray-100">
+        <% } %>
+        <h1 class="text-3xl font-bold uppercase tracking-widest text-gray-900 mb-2 break-words px-4"><%= resume.nama_lengkap %></h1>
+        <div class="text-sm text-gray-500 flex flex-wrap justify-center gap-4">
+            <span><%= resume.email_resume %></span>
+            <span>|</span>
+            <span><%= resume.phone %></span>
+        </div>
+        <div class="text-sm text-gray-500 mt-1"><%= resume.alamat %></div>
+    </header>
+
+    <section class="mb-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">About Me</h2>
+        <p class="text-gray-700 leading-relaxed text-sm"><%= resume.summary %></p>
+    </section>
+
+    <% if (education && education.length > 0) { %>
+    <section class="mb-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Education</h2>
+        <% education.forEach(edu => { %>
+            <div class="mb-4">
+                <div class="flex justify-between font-bold text-sm">
+                    <span><%= edu.school %></span>
+                    <span><%= edu.year %></span>
+                </div>
+                <div class="text-sm italic"><%= edu.major %></div>
+            </div>
+        <% }) %>
+    </section>
+    <% } %>
+
+    <% if (experience && experience.length > 0) { %>
+    <section class="mb-10">
+        <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Experience</h2>
+        <% experience.forEach(exp => { %>
+            <div class="mb-4">
+                <div class="flex justify-between font-bold text-sm">
+                    <span><%= exp.company %></span>
+                    <span><%= exp.year %></span>
+                </div>
+                <div class="text-sm italic font-medium"><%= exp.position %></div>
+                <p class="text-gray-600 text-xs mt-1 whitespace-pre-wrap"><%= exp.description %></p>
+            </div>
+        <% }) %>
+    </section>
+    <% } %>
+
+    <div class="grid grid-cols-2 gap-10">
+        <% if (skills && skills.length > 0) { %>
+        <section>
+            <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Skills</h2>
+            <ul class="list-disc list-inside text-sm text-gray-700">
+                <% skills.forEach(skill => { %>
+                    <li><%= skill.skill_name %></li>
+                <% }) %>
+            </ul>
+        </section>
+        <% } %>
+
+        <% if (certificates && certificates.length > 0) { %>
+        <section>
+            <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Certificates</h2>
+            <ul class="text-sm text-gray-700">
+                <% certificates.forEach(cert => { %>
+                    <li class="mb-2">
+                        <div class="font-bold"><%= cert.cert_name %></div>
+                        <div class="text-xs text-gray-500"><%= cert.year %></div>
+                    </li>
+                <% }) %>
+            </ul>
+        </section>
+        <% } %>
+    </div>
+</body>
+</html>

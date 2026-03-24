@@ -1,0 +1,446 @@
+<div class="container mx-auto px-4 py-10">
+    <div class="flex flex-col lg:flex-row gap-10">
+        <!-- Form Section -->
+        <div class="lg:w-1/2 bg-white p-8 rounded-2xl shadow-sm border border-gray-100 h-fit sticky top-24">
+            <h2 class="text-2xl font-bold mb-6"><%= resume ? 'Edit Resume' : 'Create Resume' %></h2>
+            
+            <form id="resumeForm" action="<%= resume ? '/resume/edit/' + resume.id : '/resume/create' %>" method="POST" enctype="multipart/form-data" class="space-y-8">
+                <!-- Data Pribadi -->
+                <div>
+                    <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center gap-2">
+                        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">1</span>
+                        Personal Information
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Profile Photo</label>
+                            <input type="file" name="photo" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" onchange="previewImage(this)">
+                            <% if (resume && resume.photo) { %>
+                                <input type="hidden" name="old_photo" value="<%= resume.photo %>">
+                                <p class="text-xs text-gray-400 mt-1">Current: <%= resume.photo %></p>
+                            <% } %>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" name="nama_lengkap" value="<%= resume ? resume.nama_lengkap : '' %>" required class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" oninput="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" name="email_resume" value="<%= resume ? resume.email_resume : '' %>" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" oninput="updatePreview()">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                            <input type="text" name="phone" value="<%= resume ? resume.phone : '' %>" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" oninput="updatePreview()">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                            <textarea name="alamat" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" rows="2" oninput="updatePreview()"><%= resume ? resume.alamat : '' %></textarea>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Summary / About Me</label>
+                            <textarea name="summary" class="w-full px-4 py-2 border rounded-lg focus:ring-blue-500 focus:border-blue-500" rows="3" oninput="updatePreview()"><%= resume ? resume.summary : '' %></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pendidikan -->
+                <div id="educationSection">
+                    <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center justify-center lg:justify-start gap-2">
+                        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">3</span>
+                        Education
+                    </h3>
+                    <div class="education-list space-y-4">
+                        <div class="education-item bg-gray-50 p-4 rounded-xl relative group">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">School/University</label>
+                                    <input type="text" name="edu_school[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Major</label>
+                                    <input type="text" name="edu_major[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                                    <input type="text" name="edu_year[]" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g. 2018 - 2022" oninput="updatePreview()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addEducation()" class="mt-4 text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                        + Add Education
+                    </button>
+                </div>
+
+                <!-- Pengalaman -->
+                <div id="experienceSection">
+                    <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center justify-center lg:justify-start gap-2">
+                        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">4</span>
+                        Experience
+                    </h3>
+                    <div class="experience-list space-y-4">
+                        <div class="experience-item bg-gray-50 p-4 rounded-xl relative group">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                    <input type="text" name="exp_company[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                                    <input type="text" name="exp_position[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                                    <input type="text" name="exp_year[]" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g. 2022 - Present" oninput="updatePreview()">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                    <textarea name="exp_desc[]" class="w-full px-4 py-2 border rounded-lg" rows="2" oninput="updatePreview()"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addExperience()" class="mt-4 text-sm font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                        + Add Experience
+                    </button>
+                </div>
+
+                <!-- Skill & Sertifikat -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">5</span>
+                            Skills
+                        </h3>
+                        <div class="skill-list space-y-2">
+                            <input type="text" name="skills[]" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g. JavaScript" oninput="updatePreview()">
+                        </div>
+                        <button type="button" onclick="addSkill()" class="mt-2 text-sm font-bold text-blue-600 hover:text-blue-700">+ Add Skill</button>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center gap-2">
+                            <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">6</span>
+                            Certificates
+                        </h3>
+                        <div class="cert-list space-y-2">
+                            <input type="text" name="certs[]" class="w-full px-4 py-2 border rounded-lg" placeholder="e.g. Google IT Support" oninput="updatePreview()">
+                        </div>
+                        <button type="button" onclick="addCert()" class="mt-2 text-sm font-bold text-blue-600 hover:text-blue-700">+ Add Certificate</button>
+                    </div>
+                </div>
+
+                <!-- Template Selection -->
+                <div>
+                    <h3 class="text-lg font-bold text-blue-600 mb-4 flex items-center justify-center lg:justify-start gap-2">
+                        <span class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-sm">7</span>
+                        Choose Template
+                    </h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="template" value="minimalist" class="hidden peer" <%= (!resume || resume.template === 'minimalist') ? 'checked' : '' %> onchange="updatePreview()">
+                            <div class="p-2 border-2 rounded-lg text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-gray-50 transition">
+                                <span class="text-xs font-bold">Minimalist</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="template" value="modern" class="hidden peer" <%= (resume && resume.template === 'modern') ? 'checked' : '' %> onchange="updatePreview()">
+                            <div class="p-2 border-2 rounded-lg text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-gray-50 transition">
+                                <span class="text-xs font-bold">Modern</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="template" value="professional" class="hidden peer" <%= (resume && resume.template === 'professional') ? 'checked' : '' %> onchange="updatePreview()">
+                            <div class="p-2 border-2 rounded-lg text-center peer-checked:border-blue-600 peer-checked:bg-blue-50 hover:bg-gray-50 transition">
+                                <span class="text-xs font-bold">Professional</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t flex gap-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">Save Resume</button>
+                    <a href="/dashboard" class="px-6 py-3 border border-gray-200 rounded-xl font-medium hover:bg-gray-50 transition">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="lg:w-1/2">
+            <div class="sticky top-24">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-500 uppercase tracking-wider text-sm">Live Preview</h2>
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 bg-red-400 rounded-full"></span>
+                        <span class="w-3 h-3 bg-yellow-400 rounded-full"></span>
+                        <span class="w-3 h-3 bg-green-400 rounded-full"></span>
+                    </div>
+                </div>
+                <!-- Preview Container -->
+                <div id="previewContainer" class="bg-white shadow-2xl rounded-sm overflow-hidden min-h-[842px] w-full origin-top transform scale-100">
+                    <div id="preview-content" class="p-10">
+                        <!-- Content will be injected here by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPhotoData = '<%= resume && resume.photo ? "/images/" + resume.photo : "" %>';
+
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentPhotoData = e.target.result;
+                updatePreview();
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function addEducation() {
+        const list = document.querySelector('.education-list');
+        const item = document.createElement('div');
+        item.className = 'education-item bg-gray-50 p-4 rounded-xl relative group';
+        item.innerHTML = `
+            <button type="button" onclick="this.parentElement.remove(); updatePreview()" class="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 transition">Remove</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">School/University</label>
+                    <input type="text" name="edu_school[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Major</label>
+                    <input type="text" name="edu_major[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                    <input type="text" name="edu_year[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                </div>
+            </div>
+        `;
+        list.appendChild(item);
+    }
+
+    function addExperience() {
+        const list = document.querySelector('.experience-list');
+        const item = document.createElement('div');
+        item.className = 'experience-item bg-gray-50 p-4 rounded-xl relative group';
+        item.innerHTML = `
+            <button type="button" onclick="this.parentElement.remove(); updatePreview()" class="absolute top-2 right-2 text-red-400 opacity-0 group-hover:opacity-100 transition">Remove</button>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                    <input type="text" name="exp_company[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                    <input type="text" name="exp_position[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                    <input type="text" name="exp_year[]" class="w-full px-4 py-2 border rounded-lg" oninput="updatePreview()">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="exp_desc[]" class="w-full px-4 py-2 border rounded-lg" rows="2" oninput="updatePreview()"></textarea>
+                </div>
+            </div>
+        `;
+        list.appendChild(item);
+    }
+
+    function addSkill() {
+        const list = document.querySelector('.skill-list');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'skills[]';
+        input.className = 'w-full px-4 py-2 border rounded-lg';
+        input.oninput = updatePreview;
+        list.appendChild(input);
+    }
+
+    function addCert() {
+        const list = document.querySelector('.cert-list');
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = 'certs[]';
+        input.className = 'w-full px-4 py-2 border rounded-lg';
+        input.oninput = updatePreview;
+        list.appendChild(input);
+    }
+
+    function updatePreview() {
+        const form = document.querySelector('#resumeForm');
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Multi-value fields
+        const edu_schools = Array.from(document.querySelectorAll('input[name="edu_school[]"]')).map(i => i.value);
+        const edu_majors = Array.from(document.querySelectorAll('input[name="edu_major[]"]')).map(i => i.value);
+        const edu_years = Array.from(document.querySelectorAll('input[name="edu_year[]"]')).map(i => i.value);
+        
+        const exp_companies = Array.from(document.querySelectorAll('input[name="exp_company[]"]')).map(i => i.value);
+        const exp_positions = Array.from(document.querySelectorAll('input[name="exp_position[]"]')).map(i => i.value);
+        const exp_years = Array.from(document.querySelectorAll('input[name="exp_year[]"]')).map(i => i.value);
+        const exp_descs = Array.from(document.querySelectorAll('textarea[name="exp_desc[]"]')).map(i => i.value);
+        
+        const skills = Array.from(document.querySelectorAll('input[name="skills[]"]')).map(i => i.value);
+        const certs = Array.from(document.querySelectorAll('input[name="certs[]"]')).map(i => i.value);
+
+        const template = document.querySelector('input[name="template"]:checked').value;
+        const previewContent = document.getElementById('preview-content');
+
+        let html = '';
+
+        if (template === 'minimalist') {
+            html = `
+                <header class="text-center mb-10">
+                    ${currentPhotoData ? `<img src="${currentPhotoData}" class="w-24 h-24 rounded-full mx-auto mb-4 object-cover border-2 border-gray-100">` : ''}
+                    <h1 class="text-2xl font-bold uppercase tracking-widest text-gray-900 mb-2 break-words">${data.nama_lengkap || 'FULL NAME'}</h1>
+                    <div class="flex flex-wrap justify-center text-[10px] text-gray-500 gap-x-4">
+                        <span>${data.email_resume || 'email@example.com'}</span>
+                        <span>|</span>
+                        <span>${data.phone || '08123456789'}</span>
+                    </div>
+                    <div class="text-[10px] text-gray-500 mt-1">${data.alamat || 'Address'}</div>
+                </header>
+
+                <section class="mb-8">
+                    <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">About Me</h2>
+                    <p class="text-gray-700 leading-relaxed text-sm">${data.summary || 'Summary brief'}</p>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Education</h2>
+                    ${edu_schools.map((s, i) => s ? `<div class="mb-4"><div class="flex justify-between font-bold text-sm"><span>${s}</span><span>${edu_years[i]}</span></div><div class="text-sm italic">${edu_majors[i]}</div></div>` : '').join('')}
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Experience</h2>
+                    ${exp_companies.map((c, i) => c ? `<div class="mb-4"><div class="flex justify-between font-bold text-sm"><span>${c}</span><span>${exp_years[i]}</span></div><div class="text-sm italic font-medium">${exp_positions[i]}</div><p class="text-gray-600 text-xs mt-1 whitespace-pre-wrap">${exp_descs[i]}</p></div>` : '').join('')}
+                </section>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <section>
+                        <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Skills</h2>
+                        <ul class="list-disc list-inside text-sm text-gray-700">
+                            ${skills.map(s => s ? `<li>${s}</li>` : '').join('')}
+                        </ul>
+                    </section>
+                    <section>
+                        <h2 class="text-sm font-bold uppercase tracking-widest border-b-2 border-gray-900 pb-1 mb-4">Certificates</h2>
+                        <ul class="text-sm text-gray-700">
+                            ${certs.map(c => c ? `<li class="mb-1">${c}</li>` : '').join('')}
+                        </ul>
+                    </section>
+                </div>
+            `;
+        } else if (template === 'modern') {
+            html = `
+                <div class="flex min-h-[842px]">
+                    <aside class="w-1/3 bg-blue-900 text-white p-2">
+                        <div class="mb-4">
+                            ${currentPhotoData ? 
+                                `<img src="${currentPhotoData}" class="w-16 h-16 rounded-lg mb-2 mx-auto object-cover border-2 border-blue-700">` : 
+                                `<div class="w-12 h-12 bg-blue-800 rounded-full mb-2 mx-auto border-2 border-blue-700 flex items-center justify-center text-lg font-bold uppercase">
+                                    ${data.nama_lengkap ? data.nama_lengkap.split(' ').map(n => n[0]).join('') : 'RN'}
+                                </div>`
+                            }
+                            <h1 class="text-[10px] font-black uppercase leading-tight break-words text-left">${data.nama_lengkap || 'FULL NAME'}</h1>
+                        </div>
+                        <section class="mb-6">
+                            <h2 class="text-blue-300 font-bold uppercase tracking-widest text-[10px] border-b border-blue-800 pb-1 mb-2">Contact</h2>
+                            <div class="text-[10px] space-y-1">
+                                <p>${data.email_resume || 'email@example.com'}</p>
+                                <p>${data.phone || '08123456789'}</p>
+                                <p class="opacity-70">${data.alamat || 'Address'}</p>
+                            </div>
+                        </section>
+                        <section>
+                            <h2 class="text-blue-300 font-bold uppercase tracking-widest text-[10px] border-b border-blue-800 pb-1 mb-2">Skills</h2>
+                            <div class="flex flex-wrap gap-1">
+                                ${skills.map(s => s ? `<span class="bg-blue-800 px-2 py-0.5 rounded-full text-[9px]">${s}</span>` : '').join('')}
+                            </div>
+                        </section>
+                    </aside>
+                    <main class="w-2/3 bg-white p-8">
+                        <section class="mb-8">
+                            <h2 class="text-sm font-bold text-blue-900 border-b-2 border-blue-900 inline-block mb-3">Profile</h2>
+                            <p class="text-gray-600 leading-relaxed text-[11px]">${data.summary || 'Summary brief'}</p>
+                        </section>
+                        <section class="mb-8">
+                            <h2 class="text-sm font-bold text-blue-900 border-b-2 border-blue-900 inline-block mb-3">Experience</h2>
+                            <div class="space-y-4">
+                                ${exp_companies.map((c, i) => c ? `<div><div class="flex justify-between items-start mb-0.5"><h3 class="font-bold text-gray-900 text-xs">${c}</h3><span class="text-[10px] font-bold text-blue-700">${exp_years[i]}</span></div><div class="text-blue-600 font-medium text-[10px]">${exp_positions[i]}</div><p class="text-gray-500 text-[9px] mt-1">${exp_descs[i]}</p></div>` : '').join('')}
+                            </div>
+                        </section>
+                        <section>
+                            <h2 class="text-sm font-bold text-blue-900 border-b-2 border-blue-900 inline-block mb-3">Education</h2>
+                            <div class="space-y-3">
+                                ${edu_schools.map((s, i) => s ? `<div><div class="flex justify-between items-start mb-0.5"><h4 class="font-bold text-gray-900 text-xs">${s}</h4><span class="text-[10px] font-bold text-blue-700">${edu_years[i]}</span></div><div class="text-gray-500 text-[10px]">${edu_majors[i]}</div></div>` : '').join('')}
+                            </div>
+                        </section>
+                    </main>
+                </div>
+            `;
+        } else {
+            html = `
+                <div class="bg-white min-h-[842px] shadow-lg border border-gray-200">
+                    <header class="bg-[#1e293b] text-white p-8 flex justify-between items-center">
+                        <div class="flex-1 min-w-0">
+                            <h1 class="text-xl font-bold tracking-tight mb-1 uppercase break-words">${data.nama_lengkap || 'FULL NAME'}</h1>
+                            <div class="flex flex-wrap gap-2 text-[9px] font-medium text-slate-300 uppercase tracking-widest">
+                                <span>${data.email_resume || 'EMAIL@EXAMPLE.COM'}</span>
+                                <span>•</span>
+                                <span>${data.phone || '08123456789'}</span>
+                            </div>
+                        </div>
+                        ${currentPhotoData ? `<img src="${currentPhotoData}" class="w-16 h-16 object-cover border-2 border-slate-700 shadow-xl rounded-full flex-shrink-0">` : ''}
+                    </header>
+                    <div class="flex">
+                        <aside class="w-1/3 bg-slate-50 p-6 border-r border-slate-200 min-h-[700px]">
+                            <section class="mb-6">
+                                <h2 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Skills</h2>
+                                <div class="flex flex-wrap gap-1">
+                                    ${skills.map(s => s ? `<span class="bg-white border border-slate-200 text-slate-700 px-2 py-0.5 rounded text-[8px] font-semibold">${s}</span>` : '').join('')}
+                                </div>
+                            </section>
+                            <section>
+                                <h2 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-3 border-b border-slate-200 pb-1">Certifications</h2>
+                                <div class="space-y-2">
+                                    ${certs.map((c, i) => c ? `<div><div class="text-[9px] font-bold text-slate-800">${c}</div><div class="text-[8px] text-slate-500">${cert_years[i]}</div></div>` : '').join('')}
+                                </div>
+                            </section>
+                        </aside>
+                        <main class="w-2/3 p-8">
+                            <section class="mb-8">
+                                <h2 class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mb-2">Executive Summary</h2>
+                                <p class="text-slate-600 leading-relaxed text-[10px] italic border-l-2 border-blue-600 pl-3 bg-blue-50 py-2 rounded-r">${data.summary || 'Summary brief'}</p>
+                            </section>
+                            <section class="mb-8">
+                                <h2 class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mb-4 border-b border-slate-100 pb-1">Professional Experience</h2>
+                                <div class="space-y-6">
+                                    ${exp_companies.map((c, i) => c ? `<div><div class="flex justify-between items-baseline mb-1"><h3 class="text-[11px] font-bold text-slate-900">${exp_positions[i]}</h3><span class="text-[8px] font-black text-slate-400 uppercase">${exp_years[i]}</span></div><div class="text-[10px] font-bold text-blue-700 mb-2">${c}</div><p class="text-slate-600 text-[9px] leading-relaxed">${exp_descs[i]}</p></div>` : '').join('')}
+                                </div>
+                            </section>
+                            <section>
+                                <h2 class="text-[9px] font-bold text-blue-600 uppercase tracking-widest mb-4 border-b border-slate-100 pb-1">Academic Background</h2>
+                                <div class="space-y-4">
+                                    ${edu_schools.map((s, i) => s ? `<div><div class="flex justify-between items-baseline mb-0.5"><h4 class="text-[11px] font-bold text-slate-900">${s}</h4><span class="text-[8px] font-bold text-slate-400">${edu_years[i]}</span></div><div class="text-[10px] text-slate-600 font-medium">${edu_majors[i]}</div></div>` : '').join('')}
+                                </div>
+                            </section>
+                        </main>
+                    </div>
+                </div>
+            `;
+        }
+
+        previewContent.innerHTML = html;
+    }
+
+    // Initialize preview
+    updatePreview();
+</script>

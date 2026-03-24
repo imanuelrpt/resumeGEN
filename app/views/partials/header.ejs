@@ -1,0 +1,19 @@
+<header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-blue-600">ResumeGen</a>
+        <nav class="hidden md:flex space-x-6 items-center">
+            <a href="/" class="hover:text-blue-600 font-medium">Home</a>
+            <% if (user) { %>
+                <a href="/dashboard" class="hover:text-blue-600 font-medium">Dashboard</a>
+                <a href="/auth/logout" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-red-100 transition">Logout</a>
+            <% } else { %>
+                <a href="/auth/login" class="hover:text-blue-600 font-medium">Login</a>
+                <a href="/auth/register" class="bg-blue-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition shadow-md shadow-blue-200">Get Started</a>
+            <% } %>
+        </nav>
+        <!-- Mobile Menu Button -->
+        <button class="md:hidden text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+        </button>
+    </div>
+</header>
